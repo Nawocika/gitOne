@@ -1,0 +1,409 @@
+var BizType = 0,   //部门
+	Areacode = 0,  //城市
+	UrlArr = (window.location.href).split('?'),
+	AreaCodeU = UrlArr[1],
+	AreaNameU = decodeURIComponent(UrlArr[2]),
+	BreadLine = $('#breadCrumbs span');
+
+if(AreaCodeU){
+	Areacode = AreaCodeU;
+	$('#breadCrumbs').find('i').eq(1).html(AreaNameU);
+}
+
+//面包屑点击设置
+function BreadSet(option){
+	var _t = option.obj;
+	if(_t.find('.main-bg').length>0){//省部
+		var _text = _t.find('span').text(),
+		    _relId = _t.attr('rel-id');
+		BreadLine.html('<em rel-id="'+_relId+'">'+ _text +'【<b>'+ $('.J-part .foc').text() +'</b>】</em>');
+	}else if(_t.parent().parent().attr('rel')=='y'){
+		var _textAll = _t.text(),
+			_num = _t.find('em').text(),
+			_text = _textAll.replace(_num,""),
+			_pro = _t.parent().siblings().find('span').text(),
+			_proId = _t.parent().parent().find('dt').attr('rel-id');
+		BreadLine.html('<a href="javascript:;" rel-id="'+ _proId +'">'+ _pro +'</a><i>></i><em rel-id="'+_relId+'">'+ _text +'【<b>'+ $('.J-part .foc').text() +'</b>】</em>').find('a').click(function(){
+			Areacode = _proId;
+			Param.areacode = _proId;
+			 $GABD.Grid.dataShow({
+				"box" : "vrvGrid",
+				"init" : dataInit,
+				"url" : WEB_ROOT + "/terminalBasicData/loadTerminalBasicDataByPage",
+				"query" : Param,
+				"backCall" : function(){
+					ListBack();
+				}
+			 });
+			 var _t = $(this),
+			 	 _text = _t.text();
+			 BreadLine.html('<em rel-id="'+_relId+'">'+ _text +'</em>');
+			 $('.J-menu-bar a').removeClass('foc');
+		});
+	}else{
+		alert('other');
+	}
+}
+//面包屑读取设置
+(function BreadReadSet(){
+	if(AreaNameU=='undefined'){
+		AreaCodeU = 0;
+		AreaNameU = '全国【<b>全部</b>】';
+	}
+	BreadLine.html('<em rel-id="'+AreaCodeU+'">'+ AreaNameU +'</em>');
+})();
+
+function ListBack(){
+	$('.mod-pop-user-add .seeDetail').click(function(){
+		var _t = $(this),
+			_ip = _t.parent().parent().parent().parent().find('tr').eq(0).find('td').eq(3).text();
+		$.ajax({
+		  type : "POST",
+		  url: WEB_ROOT + "/terminalBasicData/loadUserInfoByIpList?now=" + new Date().getTime(),
+		  data: {"ip":_ip},
+		  cache: false,
+		  async : false,
+		  dataType : "json",
+		  success: function(result){
+		      $GABD.pops({
+				"popConDoms" : $('.J-user-detail'),
+				"popCloseDoms" : $('.J-user-detail-close')
+		      });
+		      $('.J-user-detail-close').click(function(){
+	    			$('body').append('<div class="mod-pop-full"></div>');
+	    			var _wHeight = $(window).height(), 
+						_wWidth = $(window).width(), 
+						_documentH = document.documentElement.scrollHeight, 
+						_scrollH = $(window).scrollTop(), 
+						_fullH = _wHeight > _documentH ? _wHeight : _documentH;
+					$('.mod-pop-full').css({
+						"width" : _wWidth,
+						"height" : _fullH
+					}).show();
+		      });
+			  var _r = result,
+			  	  _data = _r.data,
+			  	  _len = _data.length,
+			  	  _html = '',
+			  	  _box = $('.J-user-detail .pop-con');
+			  if(_len==0){return false;}
+			  for(var i=0; i<_len; i++){
+			      _html = _html + '<tr><td class="intro">设备使用人:</td><td><i>'+ _data[i].username +'</i></td><td class="intro">市:</td><td><i>'+ _data[i].areaName +'</i></td><td class="intro">单位名称:</td><td><i>'+ _data[i].department +'</i></td></tr>';
+		      }
+			  _box.html('<table>'+ _html +'</table>');
+			  var _lastLineLen = _box.find('tr').last().find('td').length;
+			  if(_lastLineLen==2){
+				  _box.find('tr').last().append('<td class="intro"></td><td><i></i></td><td class="intro"></td><td><i></i></td>');
+			  }else if(_lastLineLen==4){
+				  _box.find('tr').last().append('<td class="intro"></td><td><i></i></td>');
+			  }else{
+				//
+			  }
+		  }
+		});
+	});
+}
+
+//列表查询初始化
+var Param = {	
+		"page" : 1,
+		"rows" : 10,
+		"code" : "areaAlias", // 按某字段排序
+		"order" : "ASC", // 正反向
+		"previous" : 0, // 上一页
+		"conditionQueries":"",
+		"bizType" : BizType,  //部门
+		"areacode" : Areacode  //城市
+	}
+
+//左侧菜单
+$.ajax({
+	  type : "POST",
+	  url: WEB_ROOT + "/terminalBasicData/loadAreaStatisticsList",
+	  data: {},
+	  cache: false,
+	  async : false,
+	  dataType : "json",
+	  success: function(result){
+		  $('.J-menu-bar').css('background','none');
+		  var _r = result,
+		  	  _data = _r.data,
+		  	  _len = _data.length,
+		  	  _box = $('.J-menu-bar'),
+		  	  _html = '',
+		  	  _city = '';
+		 for(var i=0; i<_data.length; i++){
+			 var _link = _data[i].link,
+			 	 _linkLen = _link.length;
+			 _city = '';
+			 for(var j=0; j<_linkLen; j++){
+				 _city = _city + '<a href="javascript:;" title="'
+				 + _data[i].link[j].organizationName +
+				 '" rel-id="'+ _data[i].link[j].areaCode + '">'
+				 + _data[i].link[j].organizationName +
+				 '<em>'+ _data[i].link[j].total +'</em></a>';			 
+			 }
+			 if(_linkLen==0){
+				 _city = '';
+				 //_city = '<dd><em>暂无数据！</em></dd>';
+			 }else{
+				 _city = '<dd>' + _city + '</dd>';
+			 }
+			 _html = _html + '<dl><dt rel-id="'+ _data[i].areaCode +'"><i class="main-bg"></i><em>'+ _data[i].total +'</em><span>'
+			 + _data[i].organizationName +
+			 '</span></dt>' +  _city + '</dl>';
+		 }
+		  _box.html(_html).find('dl').eq(0).addClass('foc');
+		  $GABD.menuBar({ 
+				"obj" : $('.J-menu-bar dl dt')
+		  });
+		  Areacode =  $('.J-menu-bar').find('dl').eq(0).find('dt').attr('rel-id');
+		  //详情页返回 菜单设置
+		  _box.find('dt').each(function(){
+			var _t = $(this),
+				_text = _t.text();
+			if(_text==AreaNameU){
+				_t.click();
+			}
+		});
+		  //省、市筛选
+		  $('.J-menu-bar dt').click(function(){
+			  //面包屑设置
+			  BreadSet({"obj":$(this)});
+			  $('.J-menu-bar a').removeClass('foc');
+			  var _t = $(this);
+			  Areacode = _t.attr('rel-id');
+			  busiType( {"areacode": Areacode } );
+			  Param.areacode = Areacode;
+			  Param.bizType = 0;
+			  Param.conditionQueries = '';
+			  Param.page = 1;
+				 $GABD.Grid.dataShow({
+						"box" : "vrvGrid",
+						"init" : dataInit,
+						"url" : WEB_ROOT + "/terminalBasicData/loadTerminalBasicDataByPage",
+						"query" : Param,
+						"backCall" : function(){
+							ListBack();
+							$('.user-form-fill-search input').val('');
+							$('.cur-page').attr('title','1').text(1);
+						}
+				 });
+		  });
+		  
+		  //城市点击
+		  var _menuBtn = $('.J-menu-bar a');
+		  _menuBtn.click(function(){
+			 var _t = $(this),
+			 	 _rel = _t.attr('rel-id');
+			 BreadSet({"obj":_t});
+			 Areacode = _rel;
+			 busiType( {"areacode": Areacode } );
+			 _menuBtn.removeClass('foc');
+			 _t.addClass('foc');
+		 	 //各城市数据查询
+			 Param.areacode = Areacode;
+			 Param.bizType = 0;
+			 Param.conditionQueries = '';
+			 Param.page = 1;
+			 $GABD.Grid.dataShow({
+					"box" : "vrvGrid",
+					"init" : dataInit,
+					"url" : WEB_ROOT + "/terminalBasicData/loadTerminalBasicDataByPage",
+					"query" : Param,
+					"backCall" : function(){
+						ListBack();
+						$('.user-form-fill-search input').val('');
+						$('.cur-page').attr('title','1').text(1);
+					}
+			 });
+		  });	  
+	  }
+});
+
+//业务范围
+function busiType(options){
+	var _areacode = options.areacode;
+	$.ajax({
+		  type : "POST",
+		  url: WEB_ROOT + "/terminalBasicData/loadBiztypeStatisticsList?pcode=BIZ_TYPE",
+		  data: { "areaCode" : _areacode },
+		  cache: false,
+		  async : false,
+		  dataType : "json",
+		  success: function(result){
+			  var _r = result,
+			  	  _data = _r.data,
+			  	  _len = _data.length,
+			  	  _box = $('.J-part'),
+			  	  _html = '';
+			  for(var i=0; i<_len; i++){
+				  _html = _html + '<a href="javascript:;" rel="'+ _data[i].total +'" rel-id="'+ _data[i].appClassId +'" title="'+ _data[i].appClassName +'['+ _data[i].total +']">'+ _data[i].appClassName +'</a>';
+			  }
+			  _box.html('<a href="javascript:;" rel="0" rel-id="0" title="全部" class="foc">全部</a>'+_html).find('a').click(function(){
+				  var _t = $(this);
+				  BreadLine.find('b').text(_t.text());  //业务范围提示
+				  BizType = _t.attr('rel-id');
+				  _t.addClass('foc').siblings().removeClass('foc');
+			 	 //各部门数据查询
+				 Param.bizType = BizType;
+				 $GABD.Grid.dataShow({
+					"box" : "vrvGrid",
+					"init" : dataInit,
+					"url" : WEB_ROOT + "/terminalBasicData/loadTerminalBasicDataByPage",
+					"query" : Param,
+					"backCall" : function(){
+						ListBack();
+					}
+				 });	
+			  });
+			  var _totalNum = 0;
+			  _box.find('a').each(function(){
+				  var _t = $(this),
+				  	  _num = _t.attr('rel')*1;
+				  _totalNum = _totalNum + _num;
+			  }).eq(0).attr('title', '全部 ['+ _totalNum + ']');
+		  }
+	});
+}
+busiType( {"areacode": Areacode } );
+
+//列表
+var dataInit = {
+		"colNames" : [
+		              'Nums','ipAddress','macAddress','areaAlias','deptName','deviceTypeName','deviceSecTypeName','appClassName','username','pki','devOnlyID'
+		              ],
+		"colModel" : [
+		    {"name":"序号", "index":"Nums", "width":"6%", "align":"center"},
+		    {"name":"设备IP地址", "index":"ipAddress", "width":"8%", "align":"center","sort":"true"},
+		    {"name":"地区", "index":"areaAlias", "width":"6%", "align":"center","sort":"true"},
+		    {"name":"单位名称", "index":"deptName", "width":"8%", "align":"center","sort":"true"},
+		    {"name":"设备类型", "index":"deviceTypeName", "width":"9%", "align":"center","sort":"true"},
+		    {"name":"设备用途", "index":"deviceSecTypeName", "width":"9%", "align":"center","sort":"true"},
+		    {"name":"更多", "index":"devOnlyID", "width":"7%", "align":"center", "colBack":function(obj){
+		    	var _obj = obj,
+		    		_txt = _obj.text(),
+		    		DevOnlyId = '',
+		    		DName = '';
+		    	_obj.html('<a href="javascript:;" title="更多信息" rel="'+ _txt +'">更多信息</a>').click(function(){
+		    		var _t = $(this),
+		    			_id = _t.attr('rel');
+		    		$GABD.pops({
+		    			"popConDoms" : $('.J-device-detail'),
+		    			"popCloseDoms" : $('.J-device-detail-close')
+		    		});
+
+		    		var _id = '1105700783';  //上生产此行删除
+		    		
+		    		terminalMore( {"devOnlyID":_id} );
+		    	});
+		    }},
+		    
+		    {"name":"市", "index":"areaName", "width":"6%", "align":"center","sort":"true", "hidden":"true"},
+		    {"name":"设备MAC地址", "index":"macAddress", "width":"9%", "align":"center","hidden":"true"},
+		    {"name":"省", "index":"parentAreaName", "width":"6%", "align":"center","sort":"true", "hidden":"true"},
+		    {"name":"部门名称", "index":"officeName", "hidden":"true"},
+		    {"name":"备注", "index":"floorNumber", "hidden":"true"},
+		    {"name":"计算机所在地", "index":"roomNumber", "hidden":"true"},
+		    {"name":"科室名称", "index":"subOffice", "hidden":"true"},
+		    
+		    {"name":"PKI", "index":"pki", "width":"10%"},
+		    {"name":"业务分类名称", "index":"appClassName", "width":"8%", "align":"center","sort":"true"},
+		    {"name":"注册人", "index":"username", "width":"8%", "align":"center","sort":"true"},
+		    
+		    {"name":"注册担保人", "index":"pkiUser", "hidden":"true"},
+		    {"name":"PKI ID", "index":"pkiId", "hidden":"true"},
+		    {"name":"设备使用人", "index":"spNumber", "hidden":"true", colBack : function(obj){
+		    	var _obj = obj;
+		    	_obj.html('<a href="javascript:;" title="查看" class="seeDetail">查看</a>');
+		    }},
+		    
+		    {"name":"联系电话", "index":"tel", "hidden":"true"},
+		    {"name":"操作系统类型", "index":"osType", "hidden":"true"},
+		    {"name":"操作系统语言", "index":"ssLanguage", "hidden":"true"},
+		    {"name":"IE版本", "index":"ieVersion", "hidden":"true"},
+		    {"name":"CPU类型", "index":"cpuType", "hidden":"true"},
+		    
+		    {"name":"CPU型号", "index":"cpuSerial", "hidden":"true"},
+		    {"name":"数字IP地址", "index":"numIPAddress", "hidden":"true"},
+		    {"name":"CPU主频", "index":"cpu", "hidden":"true"},
+		    
+		    {"name":"内存大小", "index":"memory", "hidden":"true"},
+		    {"name":"硬盘空间", "index":"diskSize", "hidden":"true"},
+		    {"name":"是否运行拨号上网", "index":"allowDail", "hidden":"true"},
+		    {"name":"注册时间", "index":"registerTime", "hidden":"true"},
+		    {"name":"是否注册", "index":"registered", "hidden":"true"},
+		    
+		    {"name":"防火墙状态", "index":"firwallStatus", "hidden":"true"},
+		    {"name":"网管注释", "index":"description", "hidden":"true"},
+		    {"name":"设备描述", "index":"deviceDesc", "hidden":"true"},
+		    {"name":"所有安装的操作系统", "index":"allOss", "hidden":"true"},
+		    {"name":"当前操作系统安装时间", "index":"setupTmos", "hidden":"true"}
+		]
+}
+
+$(function(){
+	//列表初始化
+	$GABD.Grid.initGrid({
+		"box" : "vrvGrid",
+		"init" : dataInit,
+		"url" : WEB_ROOT + "/terminalBasicData/loadTerminalBasicDataByPage",
+		"query" : Param,
+		"searchFile" : "deviceName",
+		"like" : "like",
+		"searchFileTip" : "设备名称模糊查询",
+		"backCall" : function(){
+			ListBack();
+		}
+	});	
+	$GABD.drop({
+		"drop" : $('.mod-drop')
+	});
+	$('.terminal-drop li').click(function(){
+		var paramName = "deviceTypeName";
+		var paramValue = $(this).text();
+		/*
+		 * 添加查询条件前，先判断里面是否有相同的参数名了。如果有，不管参数值是否相等，删除掉，重新添加。没有的话，新添加
+		 * 注意：站点类型和证书类型，参数名不同，但归为一类
+		 */
+		var conditionQueryArray;
+		if(Param.conditionQueries==null || Param.conditionQueries=="") {
+			conditionQueryArray = new Array();
+		} else {
+			conditionQueryArray = JSON.parse(Param.conditionQueries);
+			for( var i=0; i<conditionQueryArray.length; i++) {
+				//如果有相同的查询参数，替换掉
+				if("deviceTypeName"==conditionQueryArray[i].fieldName) {
+					conditionQueryArray.splice(i, 1);
+				}
+			}
+		}
+		//paramValue==null表示，当前选择的设备类型是“全部”
+		if(paramValue!=null) {
+			conditionQueryArray.push({fieldName:paramName, like:"LIKE", value:paramValue});
+		}
+		Param.conditionQueries = JSON.stringify(conditionQueryArray);
+		var _t = $(this);
+		if(_t.hasClass('btn-focus')){
+			_t.removeClass('btn-focus');
+			Param.conditionQueries = '';
+		}else{
+			_t.addClass('btn-focus').siblings().removeClass('btn-focus');
+		}
+		gridShow();
+	});
+	
+	function gridShow(){
+		$GABD.Grid.dataShow({
+			"box" : "vrvGrid",
+			"init" : dataInit,
+			"url" : WEB_ROOT + "/terminalBasicData/loadTerminalBasicDataByPage",
+			"query" : Param,
+			"backCall" : function(){
+				//
+			}
+		});
+	}
+	
+});
+
