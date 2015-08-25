@@ -1,0 +1,1264 @@
+/**
+* @author chenxiao
+* @constructor 
+* @description Police Big Data Plate
+*/
+
+var $GABD = {
+	init : function(){
+		_tWindowWidth = $(window).width();
+		if(_tWindowWidth<1300){
+			$('.J-menu-line').addClass('menu-line-arrow');
+		}
+		this.topBar({ 
+			"btn" : $('.J-top-more-infor'),
+			"drop" : $('.drop-con')
+		});
+		this.part({ 
+			"btn" : $('.J-part-btn'),
+			"box" : $('.J-part')
+		});
+		//返回顶部
+		$('.J-mod-go-top').click(function(){
+			$('html,body').animate( {scrollTop:0}, 100 );
+		});
+		//菜单焦点
+		var _href = window.location.href,
+			_pageAt = _href,
+			_pageAtArr = _pageAt.split('/');		
+		if(_pageAt.indexOf('index')>=0 || _pageAtArr[_pageAtArr.length-1]==''){  //首页
+			$('.J-menu-index').addClass('foc');
+		}else if(_pageAt.indexOf('basicDataMain')>=0){ //网站基础数据
+			$('.J-menu-bs').addClass('foc');
+		}else if(_pageAt.indexOf('bsmain')>=0 || _pageAt.indexOf('bsmainDetail')>=0 || _pageAt.indexOf('bsmainEvall')>=0 || _pageAt.indexOf('terminalBusiTypeMod')>=0 ){ //用户热点
+			$('.J-menu-hot').addClass('foc');
+		}else if(_pageAt.indexOf('csBasicDataMain')>=0){ //软件基础数据
+			$('.J-menu-cs').addClass('foc');
+		}else if(_pageAt.indexOf('terminalBasicDataMain')>=0){ //设备基础数据
+			$('.J-menu-terminal-basic').addClass('foc');
+		}else if(_pageAt.indexOf('userBasicDataMain')>=0){ //用户基础数据
+			$('.J-menu-user-basic').addClass('foc');
+		}else if(_pageAt.indexOf('basicDataStatistics')>=0){ //集群状况
+			$('.J-menu-colony').addClass('foc');
+		}else{  
+			//
+		}
+
+		//模型焦点判断
+		if(_pageAt.indexOf('bsDetailStatistics')>=0){
+			$('.J-menu-hot').addClass('foc').css('width','145').html('<i class="main-bg"></i><em>热点网站分析</em');
+		}
+		if(_pageAt.indexOf('terminalBizClassifyMod')>=0){
+			$('.J-menu-hot').addClass('foc').css('width','145').html('<i class="main-bg"></i><em>终端业务分类</em');
+		}
+		if(_pageAt.indexOf('bsIntelligentTagMod')>=0){
+			$('.J-menu-hot').addClass('foc').css('width','170').html('<i class="main-bg"></i><em>B/S标签智能识别</em');
+		}
+		if(_pageAt.indexOf('dataSteal')>=0){
+			$('.J-menu-hot').addClass('foc').css('width','150').html('<i class="main-bg"></i><em>数据盗取分析 </em');
+		}
+		if(_pageAt.indexOf('terminalUseEffiMod')>=0){
+			$('.J-menu-hot').addClass('foc').css('width','175').html('<i class="main-bg"></i><em>终端使用效率分析 </em');
+		}
+		if(_pageAt.indexOf('userLocus')>=0){
+			$('.J-menu-hot').addClass('foc').css('width','175').html('<i class="main-bg"></i><em>用户行为轨迹分析 </em');
+		}
+		
+		//集群状况  if(_pageAt=='csmain' ||  _pageAt.indexOf('basicmain')>=0 || _pageAt.indexOf('bsClassificationMain')>=0)
+		//分析模型菜单
+		var _topMenu = $('.J-menu-hot'),
+			_topMenuBox = $('.J-module-menu');
+		_topMenu.hover(function(){
+			var _t = $(this),
+				_x = _t.position().top,
+				_y = _t.position().left;
+			_topMenuBox.css({"top":_x + 40, "left":_y}).show();
+		},function(){
+			_topMenuBox.hide();
+		});
+		_topMenuBox.hover(function(){
+			_topMenu.addClass('foc');
+			_topMenuBox.show();
+		},function(){
+			var _len = $('.J-menu-line .foc').length;
+			if(_len>1){
+				_topMenu.removeClass('foc');
+			}
+			_topMenuBox.hide();
+		});
+	},
+	menuBar : function(opction){ 
+		var _obj = opction.obj;
+		_obj.click(function(){ 
+			var _t = $(this),
+				_rel = _t.parent().attr('rel');
+			if(_rel=='y'){
+				_t.parent().attr('rel', 'n').find('dd').slideUp('fast');
+			}else{ 
+				_t.parent().attr('rel', 'y').addClass('foc').find('dd').slideDown('fast');
+				_t.parent().siblings().attr('rel', 'n').removeClass('foc').find('dd').slideUp('fast');
+			}
+		});
+	},
+	topBar : function(opction){ 
+		var _btn = opction.btn,
+			_drop = opction.drop;
+		_btn.hover(function(){ 
+			$(this).find(_drop).show();
+		},function(){ 
+			$(this).find(_drop).hide();
+		});
+	},
+	part : function(opction){ 
+		var _btn = opction.btn,
+			_box = opction.box;
+		_btn.click(function(){ 
+			var _t = $(this),
+				_rel = _t.attr('rel');
+			if(_rel=='n'){ 
+				_t.attr('rel', 'y').find('span').text('收起').siblings().addClass('up');
+				_box.addClass('part-down');
+			}else{ 
+				_t.attr('rel', 'n').find('span').text('展开').siblings().removeClass('up');
+				_box.removeClass('part-down');
+			}
+		});
+	},
+	drop : function(options) {
+		var _drop = options.drop, 
+			_ul = _drop.find('ul'), 
+			_li = _drop.find('li');
+		_li.last().addClass('last');
+		_ul.each(function() {
+			var _t = $(this);
+			if (_t.find('li').length > 5) {
+				_t.addClass('scroll');
+			}
+		});
+		_drop.hover(function() {
+			var _t = $(this), 
+				_ul = _t.find('ul'), 
+				_ico = _t.find('.mod-bg');
+			_ico.addClass('up');
+			_ul.show();
+			_ul.find('li').hover(function() {
+				$(this).addClass('hover');
+			}, function() {
+				$(this).removeClass('hover');
+			}).click(function() {
+				var _t = $(this), 
+					_relId = _t.attr('rel-id'), 
+					_txt = _t.text();
+				_ico.removeClass('up');
+				_t.addClass('foc').siblings().removeClass('foc').parent().hide();
+				_t.parent().parent().attr('rel-id', _relId).find('span').text(_txt);
+			});
+		}, function() {
+			var _t = $(this), 
+				_ul = _t.find('ul');
+			_ul.hide();
+		});
+	},
+	pops : function(options) {
+		/*
+		//弹框dom 其他事件触发
+		$GABD.pops({
+			"popConDoms" : $('.mod-pop-dom'),
+			"popCloseDoms" : $('.mod-pop-close')
+		});
+	
+		//弹框dom 加载后绑定按钮触发
+		$GABD.pops({
+			"popBtnDom" : $('.mod-pop-btn-dom'),
+			"popConDom" : $('.mod-pop-dom'),
+			"popCloseDom" : $('.mod-pop-close')
+		});
+	
+		//弹框dyna 绑定
+		$GABD.pops({
+			"popTipDyna" : "yes",
+			"popBtnDyna" : $('.mod-pop-btn-dyna'),
+			"popConDyna" : '<p>动态添加到内容<i>123</i><b>456</b></p>',
+			"popTitleDyna" : '标题变化，动态改变',
+			"popAddClassDyna" : 'dynaAddClass',
+			"popOpeDyna" : 'yes',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function(){ 
+				alert('动态弹框，确认回调');
+			}
+		});
+	
+		//成功提示
+		$GABD.pops({
+			"popBtnDyna" : $('.mod-pop-btn-dyna'),
+			"popConDyna" : '<i class="mod-bg"></i><span>成功提示成功提示</span>',
+			"popTitleDyna" : '标题变化，动态改变',
+			"popAddClassDyna" : 'mod-pop-suc',
+			"popOpeDyna" : 'no',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function(){ 
+				alert('动态弹框，确认回调');
+			}
+		});
+	
+		//错误提示
+		$GABD.pops({
+			"popBtnDyna" : $('.mod-pop-btn-dyna'),
+			"popConDyna" : '<i class="mod-bg"></i><span>错误提示错误提示</span>',
+			"popTitleDyna" : '标题变化，动态改变',
+			"popAddClassDyna" : 'mod-pop-err',
+			"popOpeDyna" : 'no',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function(){ 
+				alert('动态弹框，确认回调');
+			}
+		});
+	
+		//警告提示
+		$GABD.pops({
+			"popBtnDyna" : $('.mod-pop-btn-dyna'),
+			"popConDyna" : '<i class="mod-bg"></i><span>警告提示警告提示</span>',
+			"popTitleDyna" : '标题变化，动态改变',
+			"popAddClassDyna" : 'mod-pop-warn',
+			"popOpeDyna" : 'no',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function(){ 
+				alert('动态弹框，确认回调');
+			}
+		});
+	
+		//确认操作提示
+		$GABD.pops({
+			"popBtnDyna" : $('.mod-pop-btn-dyna'),
+			"popConDyna" : '<i class="mod-bg"></i><span>确认操作提示确认操作提示</span>',
+			"popTitleDyna" : '标题变化，动态改变',
+			"popAddClassDyna" : 'mod-pop-sure',
+			"popOpeDyna" : 'yes',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function(){ 
+				alert('动态弹框，确认回调');
+			}
+		});
+	
+		//Loading
+		$GABD.pops({
+			"popBtnDyna" : $('.mod-pop-btn-dyna'),
+			"popConDyna" : '<img src="../css/images/mod/loading.gif" /><div>正在加载中 ... </div>',
+			"popTitleDyna" : '标题变化，动态改变',
+			"popAddClassDyna" : 'mod-pop-loading',
+			"popOpeDyna" : 'yes',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function(){ 
+				alert('动态弹框，确认回调');
+			}
+		});
+
+		 */
+		// dom
+		var _btnDom = options.popBtnDom, 
+			_popDom = options.popConDom, 
+			_closeDom = options.popCloseDom, 
+			_popDoms = options.popConDoms, 
+			_closeDoms = options.popCloseDoms,
+			// dyna
+			_fullShow = options.fullShow, 
+			_dynaAdd = options.dynaAdd, // 外部事件驱动，添加弹框
+			_btnDyna = options.popBtnDyna, 
+			_popDyna = options.popConDyna, 
+			_titleDyna = options.popTitleDyna, 
+			_classDyna = options.popAddClassDyna, 
+			_opeDyna = options.popOpeDyna, 
+			_fadeDyna = options.popFadeDyna, 
+			_backDyna = options.popCallbackDyna;
+		// 样式控制水平位置
+		var Position = function(obj, show) {
+			var _pops = obj, 
+				_show = show, // resize时，不直接显示pop
+				_wHeight = $(window).height(), 
+				_wWidth = $(window).width(), 
+				_documentH = document.documentElement.scrollHeight, 
+				_scrollH = $(window).scrollTop(), 
+				_fullH = _wHeight > _documentH ? _wHeight : _documentH;
+			popMove(_pops);
+			if (_show) {
+				if (!window.XMLHttpRequest) {
+					_pops.css({
+						"top" : _scrollH + _wHeight / 2
+					}).show();
+				} else {
+					_pops.show();
+				}
+				$('.mod-pop-full').css({
+					"width" : _wWidth,
+					"height" : _fullH
+				}).show();
+			} else {
+				if (!window.XMLHttpRequest) {
+					_pops.css({
+						"top" : _scrollH + _wHeight / 2
+					});
+				}
+				$('.mod-pop-full').css({
+					"width" : _wWidth,
+					"height" : _fullH
+				});
+			}
+		}
+		// btn to pop to close
+		if (_btnDom) { // 绑定触发按钮控制页面pop
+			_btnDom.click(function() {
+				$('body').append('<div class="mod-pop-full"></div>');
+				Position(_popDom, "display");
+			});
+			_closeDom.click(function() {
+				_popDom.hide();
+				if (!_fullShow) {
+					$('.mod-pop-full').remove();
+				}
+			});
+		} else {
+			// _popDoms
+			if (_popDoms) { // 外部事件驱动控制页面pop
+				$('body').append('<div class="mod-pop-full"></div>');
+				Position(_popDoms, "display");
+				_closeDoms.click(function() {
+					_popDoms.hide();
+					if (!_fullShow) {
+						$('.mod-pop-full').remove();
+					}
+				});
+			} else { // 动态插入pop
+				// opeDyna
+				var _opeHtml = '';
+				if (_opeDyna == 'yes') {
+					_opeHtml = '<div class="ope-btn"><a href="javascript:;" title="取消" class="mod-btn mod-btn-2 mod-pop-close cancel">取消</a><a href="javascript:;" title="确定" class="mod-btn mod-btn-1 sure">确定</a></div>';
+				}
+				function domOpe() {
+					$('body').append('<div class="mod-pop-full"></div><div class="mod-pop '
+						+ _classDyna +
+						'"><div class="title"><a href="javascript:;" class="mod-pop-close" title="关闭">关闭</a>'
+						+ _titleDyna +
+						'</div><div class="pop-con">'
+						+ _popDyna + 
+						'</div>' 
+						+ _opeHtml +
+						'</div>');
+					$('.' + _classDyna).find('.ope-btn .sure').click(function() {
+						$('.mod-pop-close').click();
+						_backDyna();
+					});
+					// fadeDyna
+					if (_fadeDyna == 'yes') {
+						var _time = setTimeout(function() {
+							$('.' + _classDyna).remove();
+							if (!_fullShow) {
+								$('.mod-pop-full').remove();
+							}
+						}, 1200);
+					}
+					// Position
+					Position($('.' + _classDyna), "display");
+					$('.mod-pop-close').click(function() {
+						$('.' + _classDyna).remove();
+						if (!_fullShow) {
+							$('.mod-pop-full').remove();
+						}
+					});
+				}
+				if (_dynaAdd == 'yes') {
+					domOpe();
+				} else {
+					_btnDyna.click(function() {
+						domOpe();
+					});
+				}
+			}
+		}
+		// resize
+		$(window).resize(function() {
+			if (_btnDom) {
+				Position(_popDom);
+			} else {
+				Position($('.' + _classDyna));
+			}
+		});
+		// 弹框移动
+		function popMove(popBox){
+			var _popBox = popBox,
+				_drag = false, 
+				_x, 
+				_y, 
+				_move = _popBox.find('.title'), 
+				_allPop = _popBox;
+			_move.mousedown(function(event) {
+				var e = event || window.event;
+				_drag = true;
+				_x = e.pageX - _allPop.position().left;
+				_y = e.pageY - _allPop.position().top;
+				return false;
+			});
+			$(document).mousemove(function(event) {
+					if (!_drag) {
+						return false;
+					}
+					var e = event || window.event, 
+						x = e.pageX - _x, 
+						y = e.pageY - _y, 
+						_dw = $(window).width(), 
+						_dh = $(window).height(),
+						_mPopW = _allPop.width(),
+						_mPopH = _allPop.height(),
+						maxL = _dw - _mPopW + _mPopW / 2, 
+						maxT = _dh - _mPopH;
+					x = x < _mPopW / 2 ? _mPopW / 2 : x;
+					x = x > maxL ? maxL : x;
+					y = y < _mPopH / 2 ? _mPopH / 2 : y;
+					y = y > maxT + _mPopH / 2 ? maxT + _mPopH / 2 : y;
+					_allPop.css({
+						left : x,
+						top : y
+					});					
+					return false;
+				}).mouseup(function() {
+					_drag = false;
+					return false;
+			});
+		};
+	},
+	warn : function(tips, cbk) {
+		this.pops({
+			"dynaAdd" : "yes",
+			"popBtnDyna" : $('.J-edit-record'),
+			"popConDyna" : '<i class="mod-bg"></i><span>' + tips + '</span>',
+			"popTitleDyna" : '警告提示',
+			"popAddClassDyna" : 'mod-pop-warn',
+			"popOpeDyna" : 'yes',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function() {
+				cbk();
+			}
+		});
+	},
+	success : function(tips, cbk) {
+		this.pops({
+			"dynaAdd" : "yes",
+			"popBtnDyna" : $('.J-edit-record'),
+			"popConDyna" : '<i class="mod-bg"></i><span>' + tips + '</span>',
+			"popTitleDyna" : '成功提示',
+			"popAddClassDyna" : 'mod-pop-suc',
+			"popOpeDyna" : 'yes',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function() {
+				cbk();
+			}
+		});
+	},
+	error : function(tips, cbk) {
+		this.pops({
+			"dynaAdd" : "yes",
+			"popBtnDyna" : $('.J-edit-record'),
+			"popConDyna" : '<i class="mod-bg"></i><span>' + tips + '</span>',
+			"popTitleDyna" : '错误提示',
+			"popAddClassDyna" : 'mod-pop-err',
+			"popOpeDyna" : 'yes',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function() {
+				cbk();
+			}
+		});
+	},
+	loading : function(){
+		this.pops({
+			"dynaAdd" : "yes",
+			"popConDyna" : '<img src="'+ WEB_ROOT +'/inc/css/images/mod/loading.gif" /><div>正在加载中 ... </div>',
+			"popTitleDyna" : '标题变化，动态改变',
+			"popAddClassDyna" : 'mod-pop-loading',
+			"popOpeDyna" : 'yes',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function(){ 
+				//
+			}
+		});
+	},
+	unLoading : function(){
+		var _loading = $('.mod-pop-loading'),
+			_full = $('.mod-pop-full');
+		//_loading.fadeOut("slow");
+		_loading.remove();
+		_full.fadeOut("slow");
+		var _time = setTimeout(function(){
+			_loading.remove();
+			_full.remove();
+		},800);
+	},
+	ajaxPostOperate : function(url, data, cbk) {
+		$.ajax({
+			type : "POST",
+			url : WEB_ROOT + url + "?now=" + new Date().getTime(),
+			data : data,
+			cache : false,
+			async : true,
+			dataType : "json",
+			success : function(result) {
+				if (result.success) {
+					if (result.msg) {
+						$GABD.success(result.msg, function() {
+							$('.mod-pop-close').click();
+						});
+					}
+				} else {
+					if (result.msg) {
+						$GABD.warn(result.msg, function() {
+							$('.mod-pop-close').click();
+						});
+					}
+				}
+				if (cbk) {
+					cbk(result);
+				}
+			}
+		});
+	},
+	ajaxPostOperateClose : function(url, data, cbk, modClose) {
+		$.ajax({
+			type : "POST",
+			url : WEB_ROOT + url + "?now=" + new Date().getTime(),
+			data : data,
+			cache : false,
+			async : true,
+			dataType : "json",
+			success : function(result) {
+				if (result.success) {
+					$(modClose).click();
+					//$('.J-mod-pop-password-reset .title .mod-pop-close').click();
+					if (result.msg) {
+						$GABD.success(result.msg, function() {
+							
+						});
+					}
+				} else {
+					if (result.msg) {
+						$GABD.warn(result.msg, function() {
+							
+						});
+					}
+				}
+				if (cbk) {
+					cbk(result);
+				}
+			}
+		});
+	},
+	Grid : {  // Sle:勾选  , Num:序号 , langNum:长数字, link:链接, sort:排序字段, colBack:列回调, hidden:列隐藏, More: 更多信息
+		Index : 0,
+		IndexCls : '',
+		search : function(option){
+			var _box = option.box,
+				_init = option.init,
+				_url = option.url,
+				_query = option.query,
+				_searchFile = option.searchFile,
+				_like = option.like,
+				_searchFileTip = option.searchFileTip,
+				_backCall = option.backCall,
+				_searchDom = '<div class="user-form-fill-search"><a href="javascript:;" title="搜索" class="J-url-search"><i class="main-bg"></i></a><input type="text"><span>'
+					+ _searchFileTip +
+					'：</span></div>';
+			$('#' + option.box).append(_searchDom).find('.J-url-search').click(function(){
+				var _t = $(this),
+					_s = _t.parent().find('input').val();
+				//添加查询条件前，先判断里面是否有相同的参数名了。如果有，不管参数值是否相等，删除掉，重新添加。没有的话，新添加
+				var conditionQueryArray;
+				if(_query.conditionQueries==null || _query.conditionQueries=="") {
+					conditionQueryArray = new Array();
+				} else {
+					conditionQueryArray = JSON.parse(_query.conditionQueries);
+					for( var i=0; i<conditionQueryArray.length; i++) {
+						//如果有相同的查询参数，替换掉
+						if(_searchFile==conditionQueryArray[i].fieldName) {
+							conditionQueryArray.splice(i, 1);
+						}
+					}
+				}
+				conditionQueryArray.push({fieldName:_searchFile, like:_like, value:_s});
+				_query.conditionQueries = JSON.stringify(conditionQueryArray);
+//				_query.conditionQueries = '[{"fieldName":"'+ _searchFile +'","like":"'+ _like +'","value":"'+ _s +'"}]';
+				$GABD.Grid.dataShow( {"box":_box, "init":_init, "url":_url, "query":_query, "backCall":_backCall} );
+			}).siblings('input').keyup(function(event){
+				if(event.which==13){
+					$(this).siblings('a').click();
+					$GABD.Grid.IndexCls = '';
+				}
+			});
+		},
+		page : function(option){
+			var _box = option.box,
+				_init = option.init,
+				_url = option.url,
+				_query = option.query,
+				_backCall = option.backCall,
+				_page = '<div class="page-line J-page-line"><div class="page-btn"><a href="javascript:;" title="上一页" class="main-bg prev"></a><a href="javascript:;" title="1" class="cur-page">1</a><a href="javascript:;" title="下一页" class="main-bg next"></a><em id="tiaozhuan">跳转到</em><input type="text" class="input-num"><a href="javascript:;" title="GO" class="go-page">GO</a></div><span class="unit">条</span><div class="mod-drop" rel-id="5"><span>10</span><i class="main-bg"></i><ul><li rel-id="10">10</li><li rel-id="15">15</li><li rel-id="20">20</li><li rel-id="50" class="last">50</li></ul></div><div class="page-num">共<i>0</i>条，<em>0</em>页，每页</div></div>';
+			//生成分页DOM
+			$('#'+_box).append(_page + '<div class="data-fill"></div>');
+			var _pageBox = $('#'+_box).find('.J-page-line'),
+				_totalN = _pageBox.find('.page-num i'),
+				_totalPage = _pageBox.find('.page-num em'),
+				_prev = _pageBox.find('.prev'),
+				_next = _pageBox.find('.next'),
+				_cur = _pageBox.find('.cur-page'),
+				_inputNum = _pageBox.find('.input-num'),
+				_goPage = _pageBox.find('.go-page');
+			//跳转
+			_inputNum.keyup(function(event){
+				if(event.which==13){
+					_goPage.click();
+				}
+			});
+			//上一页
+			_prev.click(function(){
+				var _t = $(this),
+					_cur = _t.siblings('.cur-page');
+				if( parseInt(_cur.text() )<2 ){
+					return false;
+				}else{
+					_cur.text( parseInt(_cur.text())-1 );
+					_query.page = parseInt(_cur.text());
+					$GABD.Grid.dataShow( {"box":_box, "init":_init, "url":_url, "query":_query, "backCall":_backCall} );
+				}
+			});
+			//下一页
+			_next.click(function(){
+				var _t = $(this),
+					_cur = _t.siblings('.cur-page'),
+					_total = parseInt(_totalPage.text());
+				if( parseInt(_cur.text()) >= _total ){
+					return false;
+				}else{
+					_cur.text( parseInt(_cur.text())+1 );
+					_query.page = parseInt(_cur.text());
+					$GABD.Grid.dataShow( {"box":_box, "init":_init, "url":_url, "query":_query, "backCall":_backCall} );
+				}
+			});
+			//跳转到页
+			_goPage.click(function(){
+				var _t = $(this),
+					_total = parseInt(_totalPage.text()),
+					_cur = _t.siblings('.cur-page'),
+					_inputN = parseInt( _t.siblings('.input-num').val() );
+				if( _inputN > _total || _t.siblings('.input-num').val()=='' ){
+					return false;
+				}else{
+					_cur.text(_inputN);
+					_query.page = _inputN;
+					$GABD.Grid.dataShow( {"box":_box, "init":_init, "url":_url, "query":_query, "backCall":_backCall} );
+				}
+			});
+			//每页显示多少条
+			$GABD.drop({
+				"drop" : $('#'+_box).find('.mod-drop')
+			});
+			$('#'+_box).find('.J-page-line .mod-drop li').click(function(){
+				var _t = $(this),
+					_relId = _t.attr('rel-id');
+				_cur.text('1');
+				_query.page = 1;
+				_query.rows = _relId;
+				$GABD.Grid.dataShow( {"box":_box, "init":_init, "url":_url, "query":_query, "backCall":_backCall} );
+			});
+		},
+		dataShow : function(option){
+			$GABD.loading();
+			var _box = option.box,
+				_init = option.init,
+				_initColNames = _init.colNames,  //表头顺序
+				_initColModel = _init.colModel,  //列数据展示
+				_url = option.url,
+				_query = option.query,
+				_backCall = option.backCall,
+				_boxS = $('#'+_box),
+				_pageBox = _boxS.find('.J-page-line'),
+				_totalN = _pageBox.find('.page-num i'),
+				_totalPage = _pageBox.find('.page-num em'),
+				_tHead = '',
+				_html='',
+				_htmlLine = '',
+				_sleBox = '',
+				_sortCol = _query.code,
+				_sortOrder = _query.order;
+			//ajax 开始
+			$.ajax({
+				type : "POST",
+				url : _url + "?now=" + new Date().getTime(),
+				data :_query,
+				cache : false,
+				async : false,
+				dataType : "json",
+				success : function(result) {
+					$GABD.unLoading();
+					var _total = result.total,
+						_limit = result.limit,
+						_pageStart = (result.start - 1) * _limit,
+						_null = null;
+					if(_total == _null){ _total = 0; }
+					_totalN.text(_total);
+					_totalPage.text(Math.ceil(_total/_limit));
+					//接口存储返回
+					if (result != null && result.total>=1) {
+						var _rows = result.rows,
+							_len = _rows.length,
+							_name = [],
+							_readSort = [],
+							_widtSet = [],
+							_align = [],
+							_sort = [],
+							_link = [],
+							_langNum = [],  //长数字列翻译
+							_colBack = [],  //列回调
+							_hidden = [],  //隐藏列
+							_allSleLine = '', 
+							_sleLine = '';
+						//列表生成
+						for(var i=0; i<_initColNames.length; i++){
+							var _headName = '';
+							for(var j=0; j<_initColModel.length; j++){
+								if(_initColNames[i]==_initColModel[j].index){
+									_name.push(_initColModel[j].name);
+									_readSort.push(_initColModel[j].index);
+									_widtSet.push(_initColModel[j].width);
+									_align.push(_initColModel[j].align);
+									_link.push(_initColModel[j].link);
+									_langNum.push(_initColModel[j].langNum);
+									_colBack.push(_initColModel[j].colBack);
+									_hidden.push(_initColModel[j].hidden);
+									if(_initColModel[j].sort){
+										if( _initColModel[j].sort.indexOf('NUM')>0 ){
+											_sort.push(_initColModel[j].index + '@NUM');
+										}else{
+											_sort.push(_initColModel[j].index);
+										}
+										
+									}else{
+										_sort.push('');
+									}
+								}
+							};
+							var _sortClass = '',
+								_sortBtn = '';
+							if( _sort[i] ){
+								_sortClass = 'sort="'+ _sort[i] +'"';
+								_sortBtn = '<i class="main-bg"></i>';
+							}
+							_headName = _name[i];
+							if( _initColNames[i]=="Sle" ){
+								_headName = '<span class="mod-form-select"><a class="main-bg line-sle all-sle" href="javascript:;" rel="all-sle"></a></span>';
+							}
+							_tHead = _tHead + '<th style="width:'+ _widtSet[i] +';align-content:'+ _align[i] +';" '+ _sortClass +'>' + _headName + _sortBtn +'</th>';
+						}
+						_tHead = '<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data-table"><tr>'+ _allSleLine + _tHead + '</tr>';
+						for(var i=0; i<_len; i++){  //行循环
+							_htmlLine = '';
+							for(var j=0; j<_readSort.length; j++){  //行内列数据生成
+								var _file = _readSort[j];
+								if(_file=='Sle'){
+									_htmlLine = _htmlLine + '<td><span class="mod-form-select"><a class="main-bg line-sle" href="javascript:;"></a></span></td>';
+								}else if(_file=='Nums'){
+									_htmlLine = _htmlLine + '<td>' + (_pageStart+i+1) + '</td>';
+								}else if(_file=='More'){
+									_htmlLine = _htmlLine + '<td><a href="javascript:;" title="更多信息" class="more-infor">更多信息</a></td>';
+								}else{
+									var _null = null,
+										_read = _rows[i][_file];
+									if(_null==_read){
+										_read = '--';
+									}
+									//如果是链接字段
+									if(_link[j]=="true"){
+										_htmlLine = _htmlLine + '<td><a href="http://'+ _rows[i][_file] +'" target="_blank">' + _rows[i][_file] + '</a></td>';
+									}else if(_langNum[j]=="true"){ //如果需要简化数字展示
+										_htmlLine = _htmlLine + '<td>' + $GABD.unitChange(_read) + '</td>';
+									}else if(_hidden[j]=="true"){ //列隐藏
+										_htmlLine = _htmlLine + '<td style="display:none;">' + _read + '</td>';
+									}else{
+										_htmlLine = _htmlLine + '<td>' + _read + '</td>';
+									}
+								}
+							}
+							_htmlLine = '<tr rel-id="'+ _rows[i].id +'">' + _htmlLine + '</tr>';
+							_html = _html + _htmlLine;
+						}
+						_html = _tHead + _html + '</table>';
+						_boxS.find('.data-fill').html('').append(_html).find('tr').hover(function(){
+							$(this).addClass('tr-hover');
+						},function(){
+							$(this).removeClass('tr-hover');
+						});
+						//排序标记
+						_boxS.find('.data-table th').each(function(){
+							var _t = $(this),
+								_sort = _t.attr('sort');
+							if(_sort){
+								if(_sortCol==_sort){
+									if(_sortOrder=='desc' || _sortOrder=='DESC'){
+										_t.addClass('down');
+									}else{
+										_t.addClass('up');
+									}
+								}
+							}
+						});
+						//隐藏列
+						for(var i=0;i<_hidden.length;i++){
+							if(_hidden[i]=='true'){
+								_boxS.find('th').eq(i).css('display', 'none');
+							}
+						};
+						//更多信息
+						_moreBtn = _boxS.find('.more-infor');
+						$GABD.pops({
+							"popTipDyna" : "yes",
+							"popBtnDyna" : _moreBtn,
+							"popConDyna" : '',
+							"popTitleDyna" : '更多信息',
+							"popAddClassDyna" : 'mod-pop-user-add',
+							"popOpeDyna" : 'no',
+							"popFadeDyna" : 'no',
+							"popCallbackDyna" : function(){ 
+								//
+							}
+						});
+						var _dynaHead = '';
+						_boxS.find('th').each(function(){
+							var _t = $(this),
+								_txt = _t.text();
+							if(_txt!='更多'){
+								if(_txt!='快照'){
+									_dynaHead = _dynaHead + _txt + ',';
+								}
+								
+							}
+						});
+						_moreBtn.click(function(){
+							var _t = $(this),
+								_dynaBody = '';
+							_t.parent().parent().find('td').each(function(){
+								var _t = $(this),
+									_txt = _t.html(),
+									_index = _t.index();
+								if(_txt!='<a href="javascript:;" title="更多信息" class="more-infor">更多信息</a>'){
+									var _thTxt = '';
+									if(_t.text()=='--'){
+										_thTxt = _boxS.find('th').eq(_index).text();
+									}
+									if(_txt!='<a href="javascript:;" title="查看" class="J-snapshot">查看</a>' && _thTxt!='快照'){
+										_dynaBody = _dynaBody + _txt + ',';
+									}
+								}
+							});
+							var _dynaHeadArr = _dynaHead.split(','),
+								_dynaBodyArr = _dynaBody.split(','),
+								_appendHtml = '';
+							for(var i=0; i<_dynaHeadArr.length-1; i++){
+								if(i%2==0){
+									_appendHtml = _appendHtml + '<tr><td class="intro">'+ _dynaHeadArr[i] +':</td><td><i>'+ _dynaBodyArr[i] +'</i></td>';
+								}else{
+									_appendHtml = _appendHtml + '<td class="intro">'+ _dynaHeadArr[i] +':</td><td><i>'+ _dynaBodyArr[i] +'</i></td></tr>';
+								}
+							}
+							_appendHtml = '<table>' + _appendHtml + '</table>';
+							var _moreInforBox = $('.mod-pop-user-add .pop-con');
+							_moreInforBox.html(_appendHtml);
+							var _lastLineLen = _moreInforBox.find('tr').last().find('td').length;
+							if(_lastLineLen==2){
+								_moreInforBox.find('tr').last().append('<td class="intro"></td><td><i></i></td>');
+							}else if(_lastLineLen==4){
+								//_moreInforBox.find('tr').last().append('<td class="intro"></td><td><i></i></td>');
+							}else{
+								//
+							}
+							_backCall();
+						});
+					}else{
+						_boxS.find('.data-fill').html('<div class="no-data">暂无数据 !</div>');
+					}
+					//列回调
+					var _lenTr = _boxS.find('tr').length;
+					for(var j=1; j<_lenTr; j++){
+						for(var i=0; i<_colBack.length; i++){
+							if(_colBack[i]){
+								var _obj = _boxS.find('tr').eq(j).find('td').eq(i);
+								(_colBack[i])(_obj);
+							}
+						}
+					};
+					//排序
+					_boxS.find('th').click(function(){
+						var _t = $(this),
+							_sort = _t.attr('sort'),
+							_index = _t.index(),
+							_class = _t.attr('class');
+						$GABD.Grid.Index = _index;
+						$GABD.Grid.IndexCls = _class;
+						if(_sort){
+							if(!_class || _class=='up'){
+								$GABD.Grid.IndexCls = 'down';
+								Param.code = _sort;
+								Param.order= 'DESC';
+								$GABD.Grid.dataShow({
+									"box":_box,
+									"init":_init,
+									"url":_url,
+									"query":_query,
+									"backCall" : _backCall
+								});
+								_boxS.find('th').eq(_index).removeClass().addClass('down');
+							}else{
+								$GABD.Grid.IndexCls = 'up';
+								Param.code = _sort;
+								Param.order= 'ASC';
+								$GABD.Grid.dataShow({
+									"box":_box,
+									"init":_init,
+									"url":_url,
+									"query":_query,
+									"backCall" : _backCall
+								});
+								_boxS.find('th').eq(_index).removeClass().addClass('up');
+							}							
+						}
+					});
+					//复选框
+					_boxS.find('.line-sle').click(function() {
+						var _t = $(this),
+							_rel = _t.attr('rel');
+						if (_t.hasClass('sle')) {
+							_t.removeClass('sle');
+							_t.parent().parent().parent().removeClass('tr-sle');
+							if (_rel == 'all-sle') {
+								_boxS.find('.line-sle').removeClass('sle');
+								_boxS.find('tr').removeClass('tr-sle');
+							}
+							_t.parent().parent().parent().parent().find('.all-sle').removeClass('sle');
+						} else {
+							if (_rel == 'all-sle') {
+								_boxS.find('.line-sle').addClass('sle');
+								_boxS.find('tr').addClass('tr-sle');
+							}
+							_t.addClass('sle');
+							_t.parent().parent().parent().addClass('tr-sle');
+						}
+					});
+					_boxS.find('th').eq($GABD.Grid.Index).addClass($GABD.Grid.IndexCls);
+					_backCall();
+				}
+			});
+			//ajax 结束
+		},
+		initGrid : function(option){
+			var _box = option.box,
+				_init = option.init,
+				_url = option.url,
+				_query = option.query,
+				_searchFile = option.searchFile,
+				_like = option.like,
+				_searchFileTip = option.searchFileTip,
+				_backCall = option.backCall;
+			this.search({
+				"box":_box,
+				"init":_init,
+				"url":_url, 
+				"query":_query,
+				"searchFile":_searchFile,
+				"like":_like, 
+				"searchFileTip":_searchFileTip,
+				"backCall" : _backCall
+			});
+			this.page({
+				"box":_box,
+				"init":_init,
+				"url":_url, 
+				"query":_query,
+				"backCall" : _backCall
+			});
+			this.dataShow({
+				"box":_box,
+				"init":_init,
+				"url":_url,
+				"query":_query,
+				"backCall" : _backCall
+			});
+		}
+	},
+	systemUserLoad : function(){
+		var id=$("#hiddentopid").val();;
+		// 树生成设置
+		$GABD.ajaxPostOperate("/systemUser/loadUserById", {
+			id : id
+		}		, function(result) {
+					if (result && result.success) {
+						var _data = result.data;
+						$("#welcome_account").text(_data["account"]);
+						$("#welcome_organizationName").text(_data["organizationName"]);
+						
+						$("#userForm").find("dd").each(function() {
+							
+									var ids = $(this).attr("id");
+									var dataIndex = ids.substr(4, ids.length-1);
+									$("#" + ids).text(_data[dataIndex]);
+								});
+					}
+				});
+	},getNewPasswordForm :  function(){
+		var data = "{";
+		$("#resetPasswordForm input").each(function() {
+			if ($(this).val() != "") {
+				data += "\"" + $(this).attr("id") + "\":\"" + $(this).val() + "\",";
+			}
+		});
+		data += "\"" + $("#hiddenPasswordId").attr("id") + "\":\"" + $("#hiddenPasswordId").val() + "\",";
+		data = data.substring(0, data.length - 1);
+		data += "}";
+		data = JSON.parse(data);//
+		return data;
+	},
+	confirm : function(btn, tips, cbk) {
+		this.pops({
+			"popBtnDyna" : btn,
+			"popConDyna" : '<i class="mod-bg"></i><span>' + tips + '</span>',
+			"popTitleDyna" : '注销用户',
+			"popAddClassDyna" : 'mod-pop-sure',
+			"popOpeDyna" : 'yes',
+			"popFadeDyna" : 'no',
+			"popCallbackDyna" : function(){ 
+				cbk();
+			}
+		});
+	},
+	unitChange : function(num){
+		var _num = num.toString(),
+			_len = _num.length,
+			_unit = '',
+			_num1,
+			_num2;
+		if(_len<=5){
+			_num1 = _num;
+		}else if(_len==6){
+			_num1 = _num.substring(0,2);
+			_num2 = _num.substring(2,4);
+			_unit = '万';
+		}else if(_len==7){
+			_num1 = _num.substring(0,3);
+			_num2 = _num.substring(3,5);
+			_unit = '万';
+		}else if(_len==8){
+			_num1 = _num.substring(0,4);
+			_num2 = _num.substring(4,6);
+			_unit = '万';
+		}else if(_len==9){
+			_num1 = _num.substring(0,1);
+			_num2 = _num.substring(1,3);
+			_unit = '亿';
+		}else if(_len==10){
+			_num1 = _num.substring(0,2);
+			_num2 = _num.substring(2,4);
+			_unit = '亿';
+		}else if(_len==11){
+			_num1 = _num.substring(0,3);
+			_num2 = _num.substring(3,5);
+			_unit = '亿';
+		}else if(_len==12){
+			_num1 = _num.substring(0,4);
+			_num2 = _num.substring(4,6);
+			_unit = '亿';
+		}else if(_len==13){
+			_num1 = _num.substring(0,5);
+			_num2 = _num.substring(5,7);
+			_unit = '亿';
+		}else{
+			_num1 = _num;
+		}
+		if(_len<6 || _len > 13){
+			return _num1;
+		}else{
+			return _num1 + '.' + _num2 + _unit;
+		}
+	},
+	fillMonth : function(month){
+		var _month = month,
+			_fillMonth = '';
+		if(_month=='一月'){
+			_fillMonth = '01';
+		}else if(_month=='二月'){
+			_fillMonth = '02';
+		}else if(_month=='三月'){
+			_fillMonth = '03';
+		}else if(_month=='四月'){
+			_fillMonth = '04';
+		}else if(_month=='五月'){
+			_fillMonth = '05';
+		}else if(_month=='六月'){
+			_fillMonth = '06';
+		}else if(_month=='七月'){
+			_fillMonth = '07';
+		}else if(_month=='八月'){
+			_fillMonth = '08';
+		}else if(_month=='九月'){
+			_fillMonth = '09';
+		}else if(_month=='十月'){
+			_fillMonth = '10';
+		}else if(_month=='十一月'){
+			_fillMonth = '11';
+		}else{
+			_fillMonth = '12';
+		}
+		return _fillMonth;
+	},
+    topTip : function(option){
+    	var _obj = option.obj,
+    		_dom = option.dom,
+    		_cName = option.cName;
+    	_obj.hover(function(event){
+    		event.stopPropagation();
+    		var _t = $(this),
+    			_x = _t.position().left,
+    			_y = _t.position().top;
+    		$('body').append('<div class="mod-top-tip '+_cName+'">'+ _dom +'</div>');
+    		$('.mod-top-tip').css({
+    			"top":_y,
+    			"left":_x
+    		});
+    	},function(){
+    		$('.mod-top-tip').remove();
+    	});
+    },
+    imgShow : function(option){
+    	var _box = option.box,
+    	    _img = _box.find('.pic-img img'),
+    	    _btnBox = _box.find('.pic-btn .btn'),
+    	    _btnP = _box.find('.prev'),
+    	    _btnN = _box.find('.next'),
+    	    _btnPO = _box.find('.prev-o'),
+    	    _btnNO = _box.find('.next-o'),
+    	    _len = _btnBox.find('img').length,
+    	    _time;
+    	_btnP.click(function(){
+    		var _last = _btnBox.find('img').last(),
+    		    _index = _btnBox.find('.foc').index();
+    		_btnBox.prepend(_last);
+    		_btnBox.find('img').removeClass('foc');
+    		_btnBox.find('img').eq(_index).addClass('foc');
+    		var _src = _btnBox.find('.foc').attr('src');
+    		_img.hide().attr('src', _src).fadeIn();
+    	});	
+    	_btnN.click(function(){
+    		var _first = _btnBox.find('img').first(),
+    			_index = _btnBox.find('.foc').index();
+    		_btnBox.append(_first);
+    		_btnBox.find('img').removeClass('foc');
+    		_btnBox.find('img').eq(_index).addClass('foc');
+    		var _src = _btnBox.find('.foc').attr('src');
+    		_img.hide().attr('src', _src).fadeIn();
+    	});
+    	_btnPO.click(function(){
+    		_btnP.click();
+    	});
+    	_btnNO.click(function(){
+    		_btnN.click();
+    	});
+    	_btnBox.find('img').click(function(){
+    		var _t = $(this),
+    			_src = _t.attr('src');
+    		_img.hide().attr('src', _src).fadeIn();
+    		_t.addClass('foc').siblings().removeClass('foc');
+    	});
+/*    	_time = setInterval(function(){
+    		_btnN.click();
+    	},3600);
+    	$('.J-pic-show').hover(function(){
+    		clearInterval(_time);
+    	},function(){
+        	_time = setInterval(function(){
+        		_btnN.click();
+        	},3600);
+    	});*/
+    }
+}
+
+$GABD.init();
+$GABD.systemUserLoad();
+//注销用户
+$GABD.confirm($('.logout'), "确定注销用户吗？", function() {
+	$GABD.ajaxPostOperateClose("/system/logout", {},
+			function(result) {
+				window.location = WEB_ROOT;
+			},'');
+});
+//重置密码确定按钮
+var popresetPasswordSure = $('.J-mod-pop-password-reset-sure');
+//新增
+function updatePassword() {
+	optFlag = "resetPassword";
+	var id = $("#top_id").text();
+	// 前一个表单清空
+	$("#resetPasswordForm input").each(function() {
+				$(this).val("");
+			});
+	$("#hiddenPasswordId").val(id);
+	if (id != "false") {
+		$GABD.pops({
+					"popConDoms" : $('.J-mod-pop-password-reset'),
+					"popCloseDoms" : $('.mod-pop-close')
+				});
+		//$("#organizationId").val(id);
+		//$("#status").val("1");
+		//$("#state").val("1");
+	}
+}
+//密码修改操作
+popresetPasswordSure.click(function() {
+	if ($('.J-mod-pop-password-reset  .mod-input-err').length > 0) {
+		return false;
+	}
+	//获取用户信息//$('.J-mod-pop-password-reset .title .mod-pop-close').click();
+	var data = $GABD.getNewPasswordForm();
+	$GABD.ajaxPostOperateClose("/systemUser/resetNewPassword", data,
+	function(result) {},'.J-mod-pop-password-reset .title .mod-pop-close');
+});
+
+//集群数据
+$.ajax({
+  type : "POST",
+  url: WEB_ROOT + "/basicDataStatistics/loadBasicDataStatisticsDate?now=" + new Date().getTime(),
+  data: {},
+  cache: false,
+  async : false,
+  dataType : "json",
+  success: function(result){
+	  var _r = result.result,
+	  	  _date = _r.data,
+		  _minDate = _date.minDate,
+		  _maxDate = _date.maxDate,
+		  _yearB = _minDate.substring(0,4),
+		  _monthB = _minDate.substring(4,6),
+		  _dayB = _minDate.substring(6,8),
+		  _yearE = _maxDate.substring(0,4),
+		  _monthE = _maxDate.substring(4,6),
+		  _dayE = _maxDate.substring(6,8);
+	  $('.J-data-time').html('集群数据：'+_yearB+'-'+ _monthB +'-'+_dayB+' 至 '+_yearE+'-'+_monthE+'-'+_dayE+'');
+  }
+});
+
+//模型分析
+$.ajax({
+	type : "POST",
+	data : {},
+	url : WEB_ROOT + "/basicDataStatistics/loadModAnlsCycle",
+	dataType : "json",
+	success : function(result) {
+		var _r = result.result,
+			_start = _r.MOD_ANLS_START,
+			_end = _r.MOD_ANLS_END;
+		$('.grid-data-time i').html('模型分析：'+ _start +' 至 '+_end);
+		$('.grid-data-time-eval').html(' ['+_start +' 至 '+_end+']')
+	}
+});
+
